@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Error Log Report</title>
+    <style type="text/css">
+body
+{
+    font-family: Georgia, serif;
+    font-size: large;
+    margin: 1em auto;
+    width: 600px;
+    text-align: center;
+}
+h1
+{
+    font-size: x-large;
+}
+#elf
+{
+    display: none;
+}
+table#errors
+{
+    width: 80%;
+    border-collapse: collapse;
+    margin: 1em auto;
+}
+table#errors caption
+{
+    margin-bottom: 1em;
+}
+table#errors th, table#errors td
+{
+    text-align: left;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    padding: 0.2em 0.4em;
+}
+table#errors .num
+{
+    text-align: right;
+}
+    </style>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript">
+      google.load('visualization', '1', {packages: ['corechart']});
+      var dt = null;
+      var chart = null;
+      function drawVisualization() {
+        // Create and populate the data table.
+        var data = dt = new google.visualization.DataTable();
+        data.addColumn('string', 'Error');
+        data.addColumn('number', 'Count');
+        // Create and draw the visualization.
+        chart = new google.visualization.PieChart(document.getElementById('visualization'));
+
+        document.getElementById('elf').src = 'elmah.axd/download?format=html-jsonp&callback=parent.onerrors';
+      }
+
+      google.setOnLoadCallback(drawVisualization);
+    </script>
+    <script type="text/javascript">
+    var loadedCount = 0;
+    var byType = {};
+    Number.prototype.formatMoney = function(c, d, t) { 
+        // http://stackoverflow.com/a/149099/6682
+        var n = this, 
+            c = isNaN(c = Math.abs(c)) ? 2 : c, 
+            d = d == undefined ? '.' : d, 
+            t = t == undefined ? ',' : t, 
+            s = n < 0 ? '-' : '', 
+            i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + '', 
+            j = (j = i.length) > 3 ? j % 3 : 0; 
+        return s + (j ? i.substr(0, j) + t : '') 
+                 + i.substr(j).replace(/(\d{3})(?=\d)/g, '$1' + t) 
+                 + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : ''); 
+    }; 
+    function formatSimpleErrorTypeName(name) {
+        var m, last;
+        m = name.match(/^([a-z0-9]+\.)+?([a-z0-9]*exception)$/i);
+        if (!m) return name;
+        last = m.pop();
+        return last.slice(0, -'exception'.length) || last;
+    }
+    function onerrors(data) 
+    {
+        loadedCount += data.errors.length;
+        $('table#errors caption').text(loadedCount < data.total 
+                                       ? loadedCount.formatMoney(0) + ' of ' + data.total.formatMoney(0) + ' errors'
+                                       : data.total.formatMoney(0) + ' errors');
+        var errors = $('#errors');
+        $(data.errors).each(function() {
+            var type = formatSimpleErrorTypeName(this.type),
+                entry = byType[type] || { count: 0, i: 0, e: null },
+                tr, row, prev, next;
+            entry.count += 1;
+            if (entry.e) {
+                entry.e.text(entry.count.formatMoney(0));
+            } else {
+                entry.i = dt.getNumberOfRows();
+                dt.addRows(1);
+                dt.setValue(entry.i, 0, type);
+                tr = $('<tr>')
+                // var words = $.trim(type.replace(/[A-Z]/g, ' $0')).toLowerCase();
+                $('<td>').attr('title', this.type).text(type).appendTo(tr);
+                entry.e = $('<td>').addClass('num ')
+                    .text(entry.count.formatMoney(0))
+                    .appendTo(tr);
+                tr.appendTo(errors);
+                byType[type] = entry;
+            }
+            row = entry.e.closest('tr');
+            while (true) {
+                prev = parseInt(row.prev().children('td:last-child').text().replace(',', ''));
+                if (isNaN(prev) || entry.count <= prev)
+                    break;
+                row.prev().before(row);
+            }
+            while (true) {
+                row = entry.e.closest('tr');
+                next = parseInt(row.next().children('td:last-child').text().replace(',', ''));
+                if (isNaN(next) || entry.count >= next)
+                    break;
+                row.next().after(row);
+            }
+            dt.setValue(entry.i, 1, entry.count);
+        });
+        chart.draw(dt, {
+            is3D:true,
+            backgroundColor:'#eee',
+            chartArea: {left:20,top:20,width:"90%",height:"90%"}
+        });
+    }
+    </script>
+</head>
+<body>
+    <div id="page">
+        <h1>Error Log Report</h1>
+        <div id="visualization" style="width: 600px; height: 400px;"></div>      
+        <table id="errors" class="sortable">
+            <caption></caption>
+            <tr><th>Type</th><th class="num sorttable_numeric">Count</th></tr>
+        </table>
+        <iframe id="elf" width="0" height="0"></iframe>
+    </div>
+</body>
+</html>
