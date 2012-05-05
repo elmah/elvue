@@ -128,8 +128,9 @@ abbr
         var errors = $('#errors');
         $(data.errors).each(function() {
             var type = formatSimpleErrorTypeName(this.type),
+                // words = type = $.trim(type.replace(/([a-z])([A-Z])/g, '$1 $2')).toLowerCase(),
                 entry = byType[type] || { count: 0, i: 0, e: null },
-                tr, row, prev, next;
+                tr, td, row, prev, next;
             entry.count += 1;
             if (entry.e) {
                 entry.e.text(entry.count.formatMoney(0));
@@ -137,12 +138,12 @@ abbr
                 entry.i = dt.getNumberOfRows();
                 dt.addRows(1);
                 dt.setValue(entry.i, 0, type);
-                tr = $('<tr>')
-                // var words = $.trim(type.replace(/[A-Z]/g, ' $0')).toLowerCase();
-                $('<td>').attr('title', this.type).text(type).appendTo(tr);
+                tr = $('<tr>');
+                td = $('<td>').appendTo(tr);
+                $('<abbr>').attr('title', this.type).text(type).appendTo(td);
                 entry.e = $('<td>').addClass('num ')
-                    .text(entry.count.formatMoney(0))
-                    .appendTo(tr);
+                                   .text(entry.count.formatMoney(0))
+                                   .appendTo(tr);
                 tr.appendTo(errors);
                 byType[type] = entry;
             }
