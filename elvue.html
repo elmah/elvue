@@ -94,7 +94,11 @@
         chart = new google.visualization.PieChart(document.getElementById('visualization'));
         config = config || {};
         config.src = config.src || 'elmah.axd/download';
-        document.getElementById('elf').src = config.src + '?format=html-jsonp&callback=parent.onerrors';
+        var src = config.src + '?format=html-jsonp&callback=parent.onerrors';
+        var limit = config.limit;
+        if ('number' === typeof limit && limit > 0)
+            src += '&limit=' + limit;
+        document.getElementById('elf').src = src;
       }
 
       google.setOnLoadCallback(drawVisualization);
