@@ -78,6 +78,7 @@
         cursor: help;
     }
     </style>
+    <script type="text/javascript" src="elvuecfg.js"></script>
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script type="text/javascript">
@@ -91,8 +92,9 @@
         data.addColumn('number', 'Count');
         // Create and draw the visualization.
         chart = new google.visualization.PieChart(document.getElementById('visualization'));
-
-        document.getElementById('elf').src = 'elmah.axd/download?format=html-jsonp&callback=parent.onerrors';
+        config = config || {};
+        config.src = config.src || 'elmah.axd/download';
+        document.getElementById('elf').src = config.src + '?format=html-jsonp&callback=parent.onerrors';
       }
 
       google.setOnLoadCallback(drawVisualization);
