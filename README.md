@@ -1,9 +1,9 @@
 Elvue
 -----
 
-Elvue is a single HTML page that provides graphical and tabular reporting on top of an ELMAH log:
+Elvue is a single HTML page that provides graphical and tabular reporting on top of an [ELMAH][1] log:
 
-![Elvue screen shot][1]
+![Elvue screen shot][2]
 
 Copy `elvue.html` to a location within a web application where ELMAH is deployed and configured (the handler registration is required). Next, add a JavaScript file named `elvuecfg.js` in the same directory
 
@@ -15,8 +15,13 @@ Launch a browser (current tested in IE, Chrome and Safari) and enter the URL of 
 
 **IMPORTANT!** Do not forget to secure access to `elvue.html` and `elvuecfg.js` to authorized users only!
 
-Got ideas on how to improve or enhance Elvue? Come [discuss][2], clone and contribute!
+For background on how Elvue works, see [Error Log Download Applications][3] wiki on the [ELMAH project site][4].
+
+Got ideas on how to improve or enhance Elvue? Come [discuss][5], clone and contribute!
 
 
-  [1]: http://wiki.elmah.googlecode.com/hg/elvue.png
-  [2]: http://groups.google.com/group/elmah-dev
+  [1]: http://elmah.googlecode.com/
+  [2]: http://wiki.elmah.googlecode.com/hg/elvue.png
+  [3]: http://code.google.com/p/elmah/wiki/ErrorLogDownloadApplications
+  [4]: http://elmah.googlecode.com/
+  [5]: http://groups.google.com/group/elmah-dev
