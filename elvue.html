@@ -92,7 +92,7 @@
         data.addColumn('number', 'Count');
         // Create and draw the visualization.
         chart = new google.visualization.PieChart(document.getElementById('visualization'));
-        config = config || {};
+        config = 'undefined' === typeof config || config == null ? {} : config;
         config.src = config.src || 'elmah.axd/download';
         var src = config.src + '?format=html-jsonp&callback=parent.onerrors';
         var limit = config.limit;
