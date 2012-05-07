@@ -7,7 +7,12 @@ Elvue is a single HTML page that provides graphical and tabular reporting on top
 
 Copy `elvue.html` to a location within a web application where ELMAH is deployed and configured (the handler registration is required). Next, add a JavaScript file named `elvuecfg.js` in the same directory with the following content:
 
-    config = { src: 'elmah.axd/download' };
+    config = { 
+      // uncomment and set options below as needed
+      // title: 'TITLE', // report title
+      // limit: 250,     // limit report to these most recent errors
+      src: 'elmah.axd/download' 
+    };
 
 Update the value of the `src` property of the `config` object to reflect the location of the ELMAH log download URL for your deployment. You can obtain this URL from the **Download Log** link that appears in the navigation bar when viewing a page of logged errors in the browser using ELMAH's built-in web pages.
 
