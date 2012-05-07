@@ -5,7 +5,7 @@ Elvue is a single HTML page that provides graphical and tabular reporting on top
 
 ![Elvue screen shot][2]
 
-Copy `elvue.html` to a location within a web application where ELMAH is deployed and configured (the handler registration is required). Next, add a JavaScript file named `elvuecfg.js` in the same directory
+Copy `elvue.html` to a location within a web application where ELMAH is deployed and configured (the handler registration is required). Next, add a JavaScript file named `elvuecfg.js` in the same directory with the following content:
 
     config = { src: 'elmah.axd/download' };
 
