@@ -78,6 +78,25 @@
         cursor: help;
     }
     </style>
+</head>
+<body>
+    <div id="page">
+        <h1>Error Log Report</h1>
+        <p id="byline">Powered by 
+            <a href="https://bitbucket.org/raboof/elvue">Elvue</a>. 
+            Copyright &copy; 2011 Atif Aziz. All rights reserved. 
+            <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a></p>
+        <div id="main">
+            <div id="visualization"></div>      
+            <table id="errors" class="sortable">
+                <caption>Loading&hellip;</caption>
+                <tr><th>Type</th>
+                    <th>Last</th>
+                    <th class="num sorttable_numeric">Count</th></tr>
+            </table>
+            </div>
+        <iframe id="elf" width="0" height="0"></iframe>
+    </div>
     <script type="text/javascript" src="elvuecfg.js"></script>
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -373,24 +392,5 @@
         });
     }
     </script>
-</head>
-<body>
-    <div id="page">
-        <h1>Error Log Report</h1>
-        <p id="byline">Powered by 
-            <a href="https://bitbucket.org/raboof/elvue">Elvue</a>. 
-            Copyright &copy; 2011 Atif Aziz. All rights reserved. 
-            <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a></p>
-        <div id="main">
-            <div id="visualization"></div>      
-            <table id="errors" class="sortable">
-                <caption>Loading&hellip;</caption>
-                <tr><th>Type</th>
-                    <th>Last</th>
-                    <th class="num sorttable_numeric">Count</th></tr>
-            </table>
-            </div>
-        <iframe id="elf" width="0" height="0"></iframe>
-    </div>
 </body>
 </html>
