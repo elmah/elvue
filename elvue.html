@@ -32,6 +32,14 @@
         background-color: #fff;
         width: 960px;
     }
+    a
+    {
+        color: #0063ce;
+    }
+    a:visited
+    {
+        color: #840094;
+    }
     h1
     {
         font-size: x-large;
@@ -77,15 +85,34 @@
     {
         cursor: help;
     }
+    footer 
+    {
+        position: fixed;
+        bottom: 0;
+        width: 960px;
+        color: #666;
+        font-size: small;
+    }
+    #about
+    {
+        background-color: #fff;
+        border-top: 1px solid #eee;
+        border-left: 1px solid #eee;
+        border-right: 1px solid #eee;
+        margin: 0;
+        width: 380px;
+        margin-left: 568px;
+        padding: 5px;
+    }
+    #about a
+    {
+        color: #0063ce;
+    }
     </style>
 </head>
 <body>
     <div id="page">
         <h1>Error Log Report</h1>
-        <p id="byline">Powered by 
-            <a href="https://bitbucket.org/raboof/elvue">Elvue</a>. 
-            Copyright &copy; 2011 Atif Aziz. All rights reserved. 
-            <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a></p>
         <div id="main">
             <div id="visualization"></div>      
             <table id="errors" class="sortable">
@@ -95,8 +122,14 @@
                     <th class="num sorttable_numeric">Count</th></tr>
             </table>
             </div>
-        <iframe id="elf" width="0" height="0"></iframe>
+        <footer>
+            <p id="about">
+                <a href="https://bitbucket.org/raboof/elvue">Elvue</a> 
+                <abbr title="copyright">&copy;</abbr> 2011 Atif Aziz. All rights reserved. 
+                <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a></p>
+        </footer>
     </div>
+    <iframe id="elf" width="0" height="0"></iframe>
     <script type="text/javascript" src="elvuecfg.js"></script>
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
