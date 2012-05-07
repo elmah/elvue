@@ -113,10 +113,19 @@
         chart = new google.visualization.PieChart(document.getElementById('visualization'));
         config = 'undefined' === typeof config || config == null ? {} : config;
         config.src = config.src || 'elmah.axd/download';
-        var src = config.src + '?format=html-jsonp&callback=parent.onerrors';
-        var limit = config.limit;
+        var location, src, limit;
+        src = config.src + '?format=html-jsonp&callback=parent.onerrors';
+        limit = config.limit;
         if ('number' === typeof limit && limit > 0)
             src += '&limit=' + limit;
+        if (config.title) {
+            document.title = config.title;
+        } else {
+            location = window.location;
+            if ('http:' === location.protocol || 'https:' === location.protocol)
+                document.title += ' for \u201c' + location.hostname + '\u201d';
+        }
+        $('h1').text(document.title);
         document.getElementById('elf').src = src;
       }
 
