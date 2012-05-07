@@ -385,7 +385,12 @@
         var errors = $('#errors');
         $(data.errors).each(function() {
             var type = formatSimpleErrorTypeName(this.type),
-                // words = type = $.trim(type.replace(/([a-z])([A-Z])/g, '$1 $2')).toLowerCase(),
+                labeling = config.labeling,
+                type = typeof labeling === 'function'
+                     ? labeling(type, this)
+                     : 'words' === labeling
+                     ? $.trim(type.replace(/([a-z])([A-Z])/g, '$1 $2')).toLowerCase()
+                     : type,
                 entry = byType[type] || { count: 0, i: 0, e: null },
                 tr, td, row, prev, next;
             entry.count += 1;
