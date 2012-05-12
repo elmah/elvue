@@ -392,7 +392,8 @@
                      ? $.trim(type.replace(/([a-z])([A-Z])/g, '$1 $2')).toLowerCase()
                      : type,
                 entry = byType[type] || { count: 0, i: 0, e: null },
-                tr, td, row, prev, next;
+                hrefs, href,
+                tr, td, a, row, prev, next, parent;
             entry.count += 1;
             if (entry.e) {
                 entry.e.text(entry.count.formatMoney(0));
@@ -403,11 +404,14 @@
                 tr = $('<tr>');
                 td = $('<td>').appendTo(tr);
                 $('<abbr>').attr('title', this.type).text(type).appendTo(td);
-                td = $('<td>').appendTo(tr);
+                parent = td = $('<td>').appendTo(tr);
+                hrefs = $.grep(this.hrefs, function(e) { return e && 'text/html' === e.type; });
+                if (hrefs.length)
+                    parent = a = $('<a target="_blank">').attr('href', hrefs[0].href).appendTo(td);
                 $('<abbr>').addClass('timeago')
                            .attr('title', this.time.replace(/\.\d{1,3}Z$/, 'Z'))
                            .text('' + new Date(Date.parse(this.time)))
-                           .appendTo(td);
+                           .appendTo(parent);
                 entry.e = $('<td>').addClass('num ')
                                    .text(entry.count.formatMoney(0))
                                    .appendTo(tr);
