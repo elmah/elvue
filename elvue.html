@@ -3,10 +3,6 @@
   ELVUE - Reports for ELMAH Error Logs
   Copyright (c) 2011 Atif Aziz. All rights reserved.
 
-   Author(s):
-
-       Atif Aziz, http://www.raboof.com
-
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -134,42 +130,9 @@
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script type="text/javascript">
-      google.load('visualization', '1', {packages: ['corechart']});
-      var dt = null;
-      var chart = null;
-      function drawVisualization() {
-        // Create and populate the data table.
-        var data = dt = new google.visualization.DataTable();
-        data.addColumn('string', 'Error');
-        data.addColumn('number', 'Count');
-        // Create and draw the visualization.
-        chart = new google.visualization.PieChart(document.getElementById('visualization'));
-        config = 'undefined' === typeof config || config == null ? {} : config;
-        config.src = config.src || 'elmah.axd/download';
-        var location, src, limit;
-        src = config.src + '?format=html-jsonp&callback=parent.onerrors';
-        limit = config.limit;
-        if ('number' === typeof limit && limit > 0)
-            src += '&limit=' + limit;
-        if (config.title) {
-            document.title = config.title;
-        } else {
-            location = window.location;
-            if ('http:' === location.protocol || 'https:' === location.protocol)
-                document.title += ' for \u201c' + location.hostname + '\u201d';
-        }
-        $('h1').text(document.title);
-        document.getElementById('elf').src = src;
-      }
-
-      google.setOnLoadCallback(drawVisualization);
-    </script>
-    <script type="text/javascript">
-    var loadedCount = 0;
-    var byType = {};
-    Number.prototype.formatMoney = function(c, d, t) { 
+    Number.prototype.formatMoney = function(c, d, t) {
         // http://stackoverflow.com/a/149099/6682
-        var n = this, 
+        var n = this,
             c = isNaN(c = Math.abs(c)) ? 2 : c, 
             d = d == undefined ? '.' : d, 
             t = t == undefined ? ',' : t, 
@@ -191,7 +154,7 @@
             var timestamp, struct, minutesOffset = 0;
 
             // ES5 section 15.9.4.2 states that the string should attempt to be parsed as a Date Time String Format string
-            // before falling back to any implementation-specific date parsing, so that’s what we do, even if native
+            // before falling back to any implementation-specific date parsing, so thatâ€™s what we do, even if native
             // implementations could be faster
             //              1 YYYY                2 MM       3 DD           4 HH    5 mm       6 ss        7 msec        8 Z 9 +/-  10 tzHH    11 tzmm
             if ((struct = /^(\d{4}|[+\-]\d{6})(?:-(\d{2})(?:-(\d{2}))?)?(?:T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?(?:(Z)|([+\-])(\d{2})(?::(\d{2}))?)?)?$/.exec(date))) {
@@ -370,78 +333,7 @@
       document.createElement("abbr");
       document.createElement("time");
     }(jQuery));
-    function formatSimpleErrorTypeName(name) {
-        var m, last;
-        m = name.match(/^([a-z0-9]+\.)+?([a-z0-9]*exception)$/i);
-        if (!m) return name;
-        last = m.pop();
-        return last.slice(0, -'exception'.length) || last;
-    }
-    function onerrors(data) {
-        loadedCount += data.errors.length;
-        $('table#errors caption').text(loadedCount < data.total
-                                       ? loadedCount.formatMoney(0) + ' of ' + data.total.formatMoney(0) + ' errors'
-                                       : data.total.formatMoney(0) + ' errors');
-        var errors = $('#errors');
-        $(data.errors).each(function() {
-            var type = formatSimpleErrorTypeName(this.type),
-                labeling = config.labeling,
-                type = typeof labeling === 'function'
-                     ? labeling(type, this)
-                     : 'words' === labeling
-                     ? $.trim(type.replace(/([a-z])([A-Z])/g, '$1 $2')).toLowerCase()
-                     : type,
-                entry = byType[type] || { count: 0, i: 0, e: null },
-                hrefs, href,
-                tr, td, a, row, prev, next, parent;
-            entry.count += 1;
-            if (entry.e) {
-                entry.e.text(entry.count.formatMoney(0));
-            } else {
-                entry.i = dt.getNumberOfRows();
-                dt.addRows(1);
-                dt.setValue(entry.i, 0, type);
-                tr = $('<tr>');
-                td = $('<td>').appendTo(tr);
-                $('<abbr>').attr('title', this.type).text(type).appendTo(td);
-                parent = td = $('<td>').appendTo(tr);
-                hrefs = $.grep(this.hrefs, function(e) { return e && 'text/html' === e.type; });
-                if (hrefs.length)
-                    parent = a = $('<a target="_blank">').attr('href', hrefs[0].href).appendTo(td);
-                $('<abbr>').addClass('timeago')
-                           .attr('title', this.time.replace(/\.\d{1,3}Z$/, 'Z'))
-                           .text('' + new Date(Date.parse(this.time)))
-                           .appendTo(parent);
-                entry.e = $('<td>').addClass('num ')
-                                   .text(entry.count.formatMoney(0))
-                                   .appendTo(tr);
-                tr.appendTo(errors);
-                byType[type] = entry;
-            }
-            row = entry.e.closest('tr');
-            while (true) {
-                prev = parseInt(row.prev().children('td:last-child').text().replace(',', ''));
-                if (isNaN(prev) || entry.count <= prev)
-                    break;
-                row.prev().before(row);
-            }
-            while (true) {
-                row = entry.e.closest('tr');
-                next = parseInt(row.next().children('td:last-child').text().replace(',', ''));
-                if (isNaN(next) || entry.count >= next)
-                    break;
-                row.next().after(row);
-            }
-            dt.setValue(entry.i, 1, entry.count);
-        });
-        $('.timeago').timeago();
-        chart.draw(dt, {
-            is3D: true,
-            width: 500,
-            height: 333,
-            chartArea: { left:10, top:10, width:'90%', height:'90%' }
-        });
-    }
     </script>
+    <script type="text/javascript" src="elvue.js"></script>
 </body>
 </html>
