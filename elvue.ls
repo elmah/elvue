@@ -76,6 +76,13 @@ app.controller \page, new Array \$scope, \config, ($scope, config) ->
         ..totalCount = 0
         ..errors = errors = []
         ..byType = byType = {}
+        ..sort = (key) ->
+            if key is @sortKey
+                @sortDescending = not @sortDescending
+            else
+                @sortKey = key
+                @sortDescending = key isnt \type
+        ..sort \count
 
     label = do (labeling = config.labeling) ->
         | typeof labeling is \function => labeling

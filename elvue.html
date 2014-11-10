@@ -66,6 +66,14 @@
     {
         text-align: right;
     }
+    table#errors tr th
+    {
+        cursor: pointer;
+    }
+    table#errors tr th:hover
+    {
+        color: blue;
+    }
     #chart
     {
         width: 500px;
@@ -120,10 +128,11 @@
                     <span ng-if="loadedCount < totalCount">{{loadedCount|number:0}} of {{totalCount|number:0}} errors</span>
                     <span ng-if="loadedCount > 0 && loadedCount >= totalCount">{{totalCount|number:0}} errors</span>
                 </caption>
-                <tr><th>Type</th>
-                    <th>Last</th>
-                    <th class="num">Count</th></tr>
-                <tr ng-repeat="e in errors|orderBy:'count':true">
+                <tr><th ng-click="sort('type')">Type</th>
+                    <th ng-click="sort('time')">Last</th>
+                    <th class="num"
+                        ng-click="sort('count')">Count</th></tr>
+                <tr ng-repeat="e in errors|orderBy:sortKey:sortDescending">
                     <td><abbr title="{{e.type$}}">{{e.type}}</abbr></td>
                     <td>
                         <a ng-if="e.href" href="{{e.href}}"><time class="timeago" title="{{e.time2}}">{{e.time|date:'medium'}}</time></a>
