@@ -105,10 +105,10 @@
     y$.byType = byType = {};
     y$.sort = function(key){
       if (key === this.sortKey) {
-        return this.sortDescending = !this.sortDescending;
+        this.sortDescending = !this.sortDescending;
       } else {
         this.sortKey = key;
-        return this.sortDescending = key !== 'type';
+        this.sortDescending = key !== 'type';
       }
     };
     y$.sort('count');
