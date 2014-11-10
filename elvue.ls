@@ -17,35 +17,99 @@
 
 id = -> it
 
-Number::formatInt ?= switch
-| Number::formatMoney? => do (f = (.formatMoney 0)) -> -> f @
-| otherwise => -> @toString!
-
 formatSimpleErrorTypeName = (name) ->
     m = name.match /^([a-z0-9]+\.)+?([a-z0-9]*exception)$/i
     switch
     | not m? => name
-    | otherwise =>
+    | _ =>
         last = m.pop!
         last.slice 0, -'exception'.length or last
 
-google.load \visualization, \1, packages: <[ corechart ]>
+app = angular.module \app, []
 
-google.setOnLoadCallback \
-    do (global = @,
-        config = @config ? {},
-        vis    = document.getElementById \visualization,
-        iframe = document.getElementById \elf) -> !->
+app.directive \googleChart, ->
+    # Inspiration: http://gavindraper.com/2013/07/30/google-charts-in-angularjs/
+    restrict : \A
+    link: ($scope, $elem, $attr) ->
+        ngModel = $scope[$attr.ngModel]
+        return unless ngModel?
+        options = {}
+        options.title = ngModel.title if ngModel.title
+        chart = new google.visualization[$attr.googleChart] $elem[0]
+        ngModel.dataTable |> chart.draw _, options
+        $scope.$watch "#{$attr.ngModel}", _, true <| ->
+            chart.draw ngModel.dataTable, ngModel.config
 
-    # Create and populate the data table.
+app.directive \elmahDownload, ->
+    restrict : \A
+    link: ($scope, $elem, $attr) !->
+        let src = $scope.src, id = $scope.$id
+            return unless src?
+            callback = \onerrors + id
+            "=parent.#{encodeURIComponent(callback)}"
+            |> src.replace (/=CALLBACK(&|$)/), _
+            |> $ $elem .attr 'src', _
+            window[callback] ?= (data) !-> $scope.$apply !-> $scope.onerrors? data
+
+app.controller \page, new Array \$scope, \config, ($scope, config) ->
 
     dt = new google.visualization.DataTable!
         ..addColumn \string, \Error
         ..addColumn \number, \Count
 
-    # Create and draw the visualization.
+    $scope.gc =
+        dataTable: dt
+        config:
+            is3D  : true
+            width : 500
+            height: 333
+            chartArea: left: 10, top: 10, width: '90%', height: '90%'
 
-    chart = new google.visualization.PieChart vis
+    $scope.src = # JSONP-ish request
+        let src = config.src || 'elmah.axd/download', limit = +config.limit
+            "#{src}?format=html-jsonp&callback=CALLBACK" \
+            + if limit > 0 then "&limit=#{limit}" else ''
+
+    $scope
+        ..callbackCount = 0
+        ..loadedCount = 0
+        ..totalCount = 0
+        ..errors = errors = []
+        ..byType = byType = {}
+
+    label = do (labeling = config.labeling) ->
+        | typeof labeling is \function => labeling
+        | labeling is \words => (type) -> $.trim type.replace /([a-z])([A-Z])/g, '$1 $2' .toLowerCase!
+        | _ => id
+
+    $scope.onerrors = (data) !->
+
+        $scope.callbackCount++
+        $scope.totalCount = data.total
+        $scope.loadedCount += data.errors.length
+
+        for err in data.errors # Group each error by its type
+
+            type = err.type |> formatSimpleErrorTypeName |> label _, err
+
+            if not (entry = byType[type])?
+
+                errors.push entry = byType[type] =
+                    type : type
+                    type$: err.type
+                    count: 0
+                    i    : errors.length
+                    time : new Date Date.parse err.time
+                    time$: err.time.replace /\.\d{1,3}Z$/, 'Z' # remove seconds fraction
+                    href : [h for h in err.hrefs when h?.href? and h.type is 'text/html'].0?.href
+
+                dt.addRows 1
+                dt.setValue entry.i, 0, type
+
+            dt.setValue entry.i, 1, ++entry.count
+
+google.setOnLoadCallback \
+    do (config = @config ? {}) -> !->
 
     # Document title
 
@@ -57,92 +121,9 @@ google.setOnLoadCallback \
             document.title += " for \u201c#{location.hostname}\u201d"
     $ \h1 .text <| document.title
 
-    # JSONP request
+    # Boot Angular
 
-    src = do (src = config.src or 'elmah.axd/download') ->
-        "#{src}?format=html-jsonp&callback=parent.onerrors"
-    limit = +config.limit
-    if limit > 0 then src += "&limit=#{limit}"
-    iframe.src = src
+    app.value \config, config
+    angular.bootstrap document.body, <[ app ]>
 
-    # JSONP callback
-
-    loadedCount = 0
-    byType = {}
-
-    global.onerrors ?= (data) !->
-
-        loadedCount += data.errors.length
-
-        $ 'table#errors caption' .text do
-            if loadedCount < data.total
-                "#{loadedCount.formatInt!} of #{data.total.formatInt!} errors"
-            else
-                "#{data.total.formatInt!} errors"
-
-        errors = $ '#errors'
-
-        label = do (labeling = config.labeling) ->
-            switch
-            | typeof labeling is \function => labeling
-            | labeling is \words => (type) -> $.trim type.replace /([a-z])([A-Z])/g, '$1 $2' .toLowerCase!
-            | otherwise id
-
-        for err in $ data.errors
-
-            # Group each error by its type
-
-            type = err.type |> formatSimpleErrorTypeName  |> label _, err
-            entry = byType[type] or count: 0, i: 0, e: null
-            entry.count += 1
-
-            if entry.e?
-                entry.count.formatInt! |> entry.e.text
-            else
-                entry.i = dt.getNumberOfRows!
-                dt.addRows 1
-                dt.setValue entry.i, 0, type
-                tr = $ \<tr>
-                td = $ \<td> .appendTo tr
-                $ \<abbr> .attr \title, err.type
-                          .text type
-                          .appendTo td
-                parent = td = $ \<td> .appendTo tr
-                hrefs = $.grep err.hrefs, (e) -> e and e.type is 'text/html'
-                if hrefs.length
-                    parent = a = $ '<a target="_blank">' .attr 'href', hrefs[0].href
-                                                         .appendTo td
-                $ \<abbr> .addClass \timeago
-                          .attr \title, err.time.replace /\.\d{1,3}Z$/, 'Z'
-                          .text '' + new Date Date.parse err.time
-                          .appendTo parent
-                entry.e = $ \<td> .addClass 'num '
-                                  .text entry.count.formatInt!
-                                  .appendTo tr
-                tr.appendTo errors
-                byType[type] = entry
-
-            row = entry.e.closest \tr
-
-            # Re-sort rows
-
-            while true
-                prev = row.prev!.children 'td:last-child' .text! .replace ',', '' |> parseInt
-                if isNaN prev or entry.count <= prev then break
-                row.prev!.before row
-
-            while true
-                row = entry.e.closest \tr
-                next = row.next!.children 'td:last-child' .text! .replace ',', '' |> parseInt
-                if isNaN next or entry.count >= next then break
-                row.next!.after row
-
-            dt.setValue entry.i, 1, entry.count
-
-        $ \.timeago .timeago!
-
-        chart.draw dt,
-            is3D  : true
-            width : 500
-            height: 333
-            chartArea: left:10, top:10, width:'90%', height:'90%'
+google.load \visualization, \1, packages: <[ corechart ]>

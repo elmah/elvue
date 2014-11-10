@@ -16,27 +16,10 @@
  * limitations under the License.
  */
 (function(){
-  var id, ref$, formatSimpleErrorTypeName;
+  var id, formatSimpleErrorTypeName, app;
   id = function(it){
     return it;
   };
-  (ref$ = Number.prototype).formatInt == null && (ref$.formatInt = (function(){
-    switch (false) {
-    case Number.prototype.formatMoney == null:
-      return function(f){
-        f == null && (f = function(it){
-          return it.formatMoney(0);
-        });
-        return function(){
-          return f(this);
-        };
-      }();
-    default:
-      return function(){
-        return this.toString();
-      };
-    }
-  }()));
   formatSimpleErrorTypeName = function(name){
     var m, last;
     m = name.match(/^([a-z0-9]+\.)+?([a-z0-9]*exception)$/i);
@@ -48,22 +31,134 @@
       return last.slice(0, -'exception'.length) || last;
     }
   };
-  google.load('visualization', '1', {
-    packages: ['corechart']
+  app = angular.module('app', []);
+  app.directive('googleChart', function(){
+    return {
+      restrict: 'A',
+      link: function($scope, $elem, $attr){
+        var ngModel, options, chart;
+        ngModel = $scope[$attr.ngModel];
+        if (ngModel == null) {
+          return;
+        }
+        options = {};
+        if (ngModel.title) {
+          options.title = ngModel.title;
+        }
+        chart = new google.visualization[$attr.googleChart]($elem[0]);
+        chart.draw(ngModel.dataTable, options);
+        return $scope.$watch($attr.ngModel + "", function(){
+          return chart.draw(ngModel.dataTable, ngModel.config);
+        }, true);
+      }
+    };
   });
-  google.setOnLoadCallback(function(global, config, vis){
-    var ref$, iframe;
-    global == null && (global = this);
+  app.directive('elmahDownload', function(){
+    return {
+      restrict: 'A',
+      link: function($scope, $elem, $attr){
+        (function(src, id){
+          var callback;
+          if (src == null) {
+            return;
+          }
+          callback = 'onerrors' + id;
+          $($elem).attr('src', src.replace(/=CALLBACK(&|$)/, "=parent." + encodeURIComponent(callback)));
+          window[callback] == null && (window[callback] = function(data){
+            $scope.$apply(function(){
+              if (typeof $scope.onerrors == 'function') {
+                $scope.onerrors(data);
+              }
+            });
+          });
+        }.call(this, $scope.src, $scope.$id));
+      }
+    };
+  });
+  app.controller('page', new Array('$scope', 'config', function($scope, config){
+    var x$, dt, y$, errors, byType, label;
+    x$ = dt = new google.visualization.DataTable();
+    x$.addColumn('string', 'Error');
+    x$.addColumn('number', 'Count');
+    $scope.gc = {
+      dataTable: dt,
+      config: {
+        is3D: true,
+        width: 500,
+        height: 333,
+        chartArea: {
+          left: 10,
+          top: 10,
+          width: '90%',
+          height: '90%'
+        }
+      }
+    };
+    $scope.src = (function(src, limit){
+      return (src + "?format=html-jsonp&callback=CALLBACK") + (limit > 0 ? "&limit=" + limit : '');
+    }.call(this, config.src || 'elmah.axd/download', +config.limit));
+    y$ = $scope;
+    y$.callbackCount = 0;
+    y$.loadedCount = 0;
+    y$.totalCount = 0;
+    y$.errors = errors = [];
+    y$.byType = byType = {};
+    label = function(labeling){
+      labeling == null && (labeling = config.labeling);
+      switch (false) {
+      case typeof labeling !== 'function':
+        return labeling;
+      case labeling !== 'words':
+        return function(type){
+          return $.trim(type.replace(/([a-z])([A-Z])/g, '$1 $2')).toLowerCase();
+        };
+      default:
+        return id;
+      }
+    }();
+    return $scope.onerrors = function(data){
+      var i$, ref$, len$, err, type, entry, ref1$, h;
+      $scope.callbackCount++;
+      $scope.totalCount = data.total;
+      $scope.loadedCount += data.errors.length;
+      for (i$ = 0, len$ = (ref$ = data.errors).length; i$ < len$; ++i$) {
+        err = ref$[i$];
+        type = label(formatSimpleErrorTypeName(
+        err.type), err);
+        if ((entry = byType[type]) == null) {
+          errors.push(entry = byType[type] = {
+            type: type,
+            type$: err.type,
+            count: 0,
+            i: errors.length,
+            time: new Date(Date.parse(err.time)),
+            time$: err.time.replace(/\.\d{1,3}Z$/, 'Z'),
+            href: (ref1$ = (fn$())[0]) != null ? ref1$.href : void 8
+          });
+          dt.addRows(1);
+          dt.setValue(entry.i, 0, type);
+        }
+        dt.setValue(entry.i, 1, ++entry.count);
+      }
+      function fn$(){
+        var i$, ref$, len$, results$ = [];
+        for (i$ = 0, len$ = (ref$ = err.hrefs).length; i$ < len$; ++i$) {
+          h = ref$[i$];
+          if ((h != null ? h.href : void 8) != null && h.type === 'text/html') {
+            results$.push(h);
+          }
+        }
+        return results$;
+      }
+    };
+  }));
+  google.setOnLoadCallback(function(config){
+    var ref$;
     config == null && (config = (ref$ = this.config) != null
       ? ref$
       : {});
-    vis == null && (vis = document.getElementById('visualization', iframe = document.getElementById('elf')));
     return function(){
-      var x$, dt, chart, location, ref$, src, limit, loadedCount, byType;
-      x$ = dt = new google.visualization.DataTable();
-      x$.addColumn('string', 'Error');
-      x$.addColumn('number', 'Count');
-      chart = new google.visualization.PieChart(vis);
+      var location, ref$;
       if (config.title) {
         document.title = config.title;
       } else {
@@ -73,103 +168,11 @@
         }
       }
       $('h1').text(document.title);
-      src = function(src){
-        src == null && (src = config.src || 'elmah.axd/download');
-        return src + "?format=html-jsonp&callback=parent.onerrors";
-      }();
-      limit = +config.limit;
-      if (limit > 0) {
-        src += "&limit=" + limit;
-      }
-      iframe.src = src;
-      loadedCount = 0;
-      byType = {};
-      global.onerrors == null && (global.onerrors = function(data){
-        var errors, label, i$, ref$, len$, err, type, entry, tr, td, parent, hrefs, a, row, prev, next;
-        loadedCount += data.errors.length;
-        $('table#errors caption').text(loadedCount < data.total
-          ? loadedCount.formatInt() + " of " + data.total.formatInt() + " errors"
-          : data.total.formatInt() + " errors");
-        errors = $('#errors');
-        label = function(labeling){
-          labeling == null && (labeling = config.labeling);
-          switch (false) {
-          case typeof labeling !== 'function':
-            return labeling;
-          case labeling !== 'words':
-            return function(type){
-              return $.trim(type.replace(/([a-z])([A-Z])/g, '$1 $2')).toLowerCase();
-            };
-          default:
-            return id;
-          }
-        }();
-        for (i$ = 0, len$ = (ref$ = $(data.errors)).length; i$ < len$; ++i$) {
-          err = ref$[i$];
-          type = label(formatSimpleErrorTypeName(
-          err.type), err);
-          entry = byType[type] || {
-            count: 0,
-            i: 0,
-            e: null
-          };
-          entry.count += 1;
-          if (entry.e != null) {
-            entry.e.text(
-            entry.count.formatInt());
-          } else {
-            entry.i = dt.getNumberOfRows();
-            dt.addRows(1);
-            dt.setValue(entry.i, 0, type);
-            tr = $('<tr>');
-            td = $('<td>').appendTo(tr);
-            $('<abbr>').attr('title', err.type).text(type).appendTo(td);
-            parent = td = $('<td>').appendTo(tr);
-            hrefs = $.grep(err.hrefs, fn$);
-            if (hrefs.length) {
-              parent = a = $('<a target="_blank">').attr('href', hrefs[0].href).appendTo(td);
-            }
-            $('<abbr>').addClass('timeago').attr('title', err.time.replace(/\.\d{1,3}Z$/, 'Z')).text('' + new Date(Date.parse(err.time))).appendTo(parent);
-            entry.e = $('<td>').addClass('num ').text(entry.count.formatInt()).appendTo(tr);
-            tr.appendTo(errors);
-            byType[type] = entry;
-          }
-          row = entry.e.closest('tr');
-          for (;;) {
-            prev = parseInt(
-            row.prev().children('td:last-child').text().replace(',', ''));
-            if (isNaN(prev) || entry.count <= prev) {
-              break;
-            }
-            row.prev().before(row);
-          }
-          for (;;) {
-            row = entry.e.closest('tr');
-            next = parseInt(
-            row.next().children('td:last-child').text().replace(',', ''));
-            if (isNaN(next) || entry.count >= next) {
-              break;
-            }
-            row.next().after(row);
-          }
-          dt.setValue(entry.i, 1, entry.count);
-        }
-        $('.timeago').timeago();
-        chart.draw(dt, {
-          is3D: true,
-          width: 500,
-          height: 333,
-          chartArea: {
-            left: 10,
-            top: 10,
-            width: '90%',
-            height: '90%'
-          }
-        });
-        function fn$(e){
-          return e && e.type === 'text/html';
-        }
-      });
+      app.value('config', config);
+      angular.bootstrap(document.body, ['app']);
     };
   }());
+  google.load('visualization', '1', {
+    packages: ['corechart']
+  });
 }).call(this);

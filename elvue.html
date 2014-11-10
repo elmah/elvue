@@ -66,7 +66,7 @@
     {
         text-align: right;
     }
-    #visualization
+    #chart
     {
         width: 500px;
         height: 333px;
@@ -104,18 +104,33 @@
     {
         color: #0063ce;
     }
+    [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+        display: none !important;
+    }
     </style>
 </head>
-<body>
+<body ng-controller="page">
     <div id="page">
         <h1>Error Log Report</h1>
-        <div id="main">
-            <div id="visualization"></div>
-            <table id="errors" class="sortable">
-                <caption>Loading&hellip;</caption>
+        <div id="main" ng-cloak>
+            <div id="chart" google-chart="PieChart" ng-model="gc"></div>
+            <table id="errors">
+                <caption>
+                    <span ng-if="callbackCount == 0">Loading&hellip;</span>
+                    <span ng-if="loadedCount < totalCount">{{loadedCount|number:0}} of {{totalCount|number:0}} errors</span>
+                    <span ng-if="loadedCount > 0 && loadedCount >= totalCount">{{totalCount|number:0}} errors</span>
+                </caption>
                 <tr><th>Type</th>
                     <th>Last</th>
-                    <th class="num sorttable_numeric">Count</th></tr>
+                    <th class="num">Count</th></tr>
+                <tr ng-repeat="e in errors|orderBy:'count':true">
+                    <td><abbr title="{{e.type$}}">{{e.type}}</abbr></td>
+                    <td>
+                        <a ng-if="e.href" href="{{e.href}}"><time class="timeago" title="{{e.time2}}">{{e.time|date:'medium'}}</time></a>
+                        <time ng-if="!e.href" class="timeago" title="{{e.time$}}">{{e.time|date:'medium'}}</time>
+                    </td>
+                    <td class="num">{{e.count|number:0}}</td>
+                </tr>
             </table>
             </div>
         <footer>
@@ -125,24 +140,12 @@
                 <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a></p>
         </footer>
     </div>
-    <iframe id="elf" width="0" height="0"></iframe>
+    <iframe id="elf" width="0" height="0" elmah-download="{{src}}"></iframe>
     <script type="text/javascript" src="elvuecfg.js"></script>
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
     <script type="text/javascript">
-    Number.prototype.formatMoney = function(c, d, t) {
-        // http://stackoverflow.com/a/149099/6682
-        var n = this,
-            c = isNaN(c = Math.abs(c)) ? 2 : c, 
-            d = d == undefined ? '.' : d, 
-            t = t == undefined ? ',' : t, 
-            s = n < 0 ? '-' : '', 
-            i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + '', 
-            j = (j = i.length) > 3 ? j % 3 : 0; 
-        return s + (j ? i.substr(0, j) + t : '') 
-                 + i.substr(j).replace(/(\d{3})(?=\d)/g, '$1' + t)
-                 + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : '');
-    };
     /**
      * Date.parse with progressive enhancement for ISO 8601 <https://github.com/csnover/js-iso8601>
      * (c) 2011 Colin Snover <http://zetafleet.com>
