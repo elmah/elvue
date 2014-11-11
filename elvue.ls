@@ -17,6 +17,10 @@
 
 id = -> it
 
+$ ?= ->
+    if typeof it is \string then document.querySelector it else it
+    |> angular.element
+
 formatSimpleErrorTypeName = (name) ->
     m = name.match /^([a-z0-9]+\.)+?([a-z0-9]*exception)$/i
     switch
@@ -25,7 +29,9 @@ formatSimpleErrorTypeName = (name) ->
         last = m.pop!
         last.slice 0, -'exception'.length or last
 
-app = angular.module \app, []
+app = angular
+    .module \app, <[ angularMoment ]>
+    .constant \angularMomentConfig, preprocess: \utc
 
 app.directive \googleChart, ->
     # Inspiration: http://gavindraper.com/2013/07/30/google-charts-in-angularjs/
@@ -126,7 +132,7 @@ google.setOnLoadCallback \
         location = window.location
         if location.protocol in <[ http: https: ]>
             document.title += " for \u201c#{location.hostname}\u201d"
-    $ \h1 .text <| document.title
+    $ \h1 .text document.title
 
     # Boot Angular
 

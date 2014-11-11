@@ -16,10 +16,14 @@
  * limitations under the License.
  */
 (function(){
-  var id, formatSimpleErrorTypeName, app;
+  var id, $, formatSimpleErrorTypeName, app;
   id = function(it){
     return it;
   };
+  $ == null && ($ = function(it){
+    return angular.element(
+    typeof it === 'string' ? document.querySelector(it) : it);
+  });
   formatSimpleErrorTypeName = function(name){
     var m, last;
     m = name.match(/^([a-z0-9]+\.)+?([a-z0-9]*exception)$/i);
@@ -31,7 +35,9 @@
       return last.slice(0, -'exception'.length) || last;
     }
   };
-  app = angular.module('app', []);
+  app = angular.module('app', ['angularMoment']).constant('angularMomentConfig', {
+    preprocess: 'utc'
+  });
   app.directive('googleChart', function(){
     return {
       restrict: 'A',
