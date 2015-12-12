@@ -2,9 +2,9 @@ Elvue
 -----
 
 Elvue is a single HTML page and JavaScript file that provides graphical and 
-tabular reporting on top of an [ELMAH][1] log:
+tabular reporting on top of an [ELMAH][elmah] log:
 
-![Elvue screen shot][2]
+![Elvue screen shot][ipadshot]
 
 Copy `elvue.html` and `elvue.js` to a location within a web application where 
 ELMAH is deployed and configured (the handler registration is required). Next, 
@@ -31,15 +31,14 @@ report building up dynamically as your error log is scanned.
 **IMPORTANT!** Do not forget to secure access to `elvue.html` and 
 `elvuecfg.js` to authorized users only!
 
-For background on how Elvue works, see [Error Log Download Applications][3] 
-wiki on the [ELMAH project site][4].
+For background on how Elvue works, see [Error Log Download 
+Applications][errdlapps] wiki on the [ELMAH project site][elmah].
 
-Got ideas on how to improve or enhance Elvue? Come [discuss][5], clone and 
-contribute!
+Got ideas on how to improve or enhance Elvue? Come [discuss][devgrp], 
+clone and contribute!
 
 
-  [1]: http://elmah.googlecode.com/
-  [2]: http://wiki.elmah.googlecode.com/hg/elvue.png
-  [3]: http://code.google.com/p/elmah/wiki/ErrorLogDownloadApplications
-  [4]: http://elmah.googlecode.com/
-  [5]: http://groups.google.com/group/elmah-dev
+  [elmah]: https://elmah.github.io/
+  [ipadshot]: http://wiki.elmah.googlecode.com/hg/elvue.png
+  [errdlapps]: https://bytebucket.org/project-elmah/gcwiki/raw/0a421a57ebe054ac7c2da66ff6d27ce8fde0c7fb/elvue.png
+  [devgrp]: http://groups.google.com/group/elmah-dev
