@@ -6,6 +6,9 @@ tabular reporting on top of an [ELMAH][elmah] log:
 
 ![Elvue screen shot][ipadshot]
 
+It is implemented using [AngularJS][angularjs] & [Google Charts][gcharts] & 
+code in [LiveScript][ls].
+
 Copy `elvue.html` and `elvue.js` to a location within a web application where 
 ELMAH is deployed and configured (the handler registration is required). Next, 
 add a JavaScript file named `elvuecfg.js` in the same directory with the 
@@ -42,3 +45,6 @@ clone and contribute!
   [ipadshot]: http://wiki.elmah.googlecode.com/hg/elvue.png
   [errdlapps]: https://bytebucket.org/project-elmah/gcwiki/raw/0a421a57ebe054ac7c2da66ff6d27ce8fde0c7fb/elvue.png
   [devgrp]: http://groups.google.com/group/elmah-dev
+  [angularjs]: https://angularjs.org/
+  [gcharts]: https://developers.google.com/chart/
+  [ls]: http://livescript.net/
