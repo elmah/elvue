@@ -43,7 +43,7 @@ clone and contribute!
 
   [elmah]: https://elmah.github.io/
   [ipadshot]: http://wiki.elmah.googlecode.com/hg/elvue.png
-  [errdlapps]: https://bytebucket.org/project-elmah/gcwiki/raw/0a421a57ebe054ac7c2da66ff6d27ce8fde0c7fb/elvue.png
+  [errdlapps]: https://elmah.github.io/a/error-log-download-applications/
   [devgrp]: http://groups.google.com/group/elmah-dev
   [angularjs]: https://angularjs.org/
   [gcharts]: https://developers.google.com/chart/
