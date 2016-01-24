@@ -69,7 +69,7 @@
             return;
           }
           callback = 'onerrors' + id;
-          $($elem).attr('src', src.replace(/=CALLBACK(&|$)/, "=parent." + encodeURIComponent(callback)));
+          $($elem).attr('src', src.replace(/=CALLBACK(?=&|$)/, "=parent." + encodeURIComponent(callback)));
           window[callback] == null && (window[callback] = function(data){
             $scope.$apply(function(){
               if (typeof $scope.onerrors == 'function') {

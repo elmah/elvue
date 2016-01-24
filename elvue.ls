@@ -53,7 +53,7 @@ app.directive \elmahDownload, ->
             return unless src?
             callback = \onerrors + id
             "=parent.#{encodeURIComponent(callback)}"
-            |> src.replace (/=CALLBACK(&|$)/), _
+            |> src.replace (/=CALLBACK(?=&|$)/), _
             |> $ $elem .attr 'src', _
             window[callback] ?= (data) !-> $scope.$apply !-> $scope.onerrors? data
 
