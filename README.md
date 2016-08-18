@@ -42,7 +42,7 @@ clone and contribute!
 
 
   [elmah]: https://elmah.github.io/
-  [ipadshot]: http://wiki.elmah.googlecode.com/hg/elvue.png
+  [ipadshot]: elvue.png
   [errdlapps]: https://elmah.github.io/a/error-log-download-applications/
   [devgrp]: http://groups.google.com/group/elmah-dev
   [angularjs]: https://angularjs.org/
